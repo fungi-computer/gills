@@ -1,0 +1,72 @@
+{
+  "expectedTarballFiles": [
+    "package/LICENSE",
+    "package/README.md",
+    "package/dist/declaration.d.ts",
+    "package/dist/declaration.js",
+    "package/dist/gill.d.ts",
+    "package/dist/gill.js",
+    "package/dist/index.d.ts",
+    "package/dist/index.js",
+    "package/dist/presentation.d.ts",
+    "package/dist/presentation.js",
+    "package/dist/rows.d.ts",
+    "package/dist/rows.js",
+    "package/docs/api/README.md",
+    "package/docs/api/index.md",
+    "package/docs/api/modules.md",
+    "package/docs/api/presentation.md",
+    "package/package.json"
+  ],
+  "runtimeFixture": "test/stranger/runtime.mjs",
+  "typecheckFixture": "test/stranger/consumer.mts",
+  "docs": {
+    "sigil": "list",
+    "home": {
+      "lead": "Plain-text App views shared by browser and terminal hosts.",
+      "example": {
+        "file": "home.ts",
+        "title": "Decode a row page",
+        "caption": "Decode a row page and a bounded request through the shared schemas."
+      },
+      "ladder": {
+        "start": [
+          {
+            "title": "Quickstart",
+            "href": "/quickstart/",
+            "description": "Run the first example and follow its host setup instructions."
+          }
+        ],
+        "tasks": [
+          {
+            "title": "Core concepts",
+            "href": "/concepts/",
+            "description": "Understand the package contract and host responsibilities."
+          },
+          {
+            "title": "Examples",
+            "href": "/examples/",
+            "description": "Find examples and the checks that exercise them."
+          }
+        ],
+        "reference": [
+          {
+            "title": "API reference",
+            "href": "/api/",
+            "description": "Browse the exported types, methods and schemas."
+          },
+          {
+            "title": "Install",
+            "href": "/install/",
+            "description": "Check entrypoints, dependencies and runtime requirements."
+          },
+          {
+            "title": "Status and limits",
+            "href": "/status/",
+            "description": "Read stability, limits and errors."
+          }
+        ]
+      }
+    }
+  }
+}

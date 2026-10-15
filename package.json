@@ -1,0 +1,70 @@
+{
+  "name": "@fungi.computer/gills",
+  "version": "0.0.1",
+  "author": "Levi <levi@technomancy.dev>",
+  "description": "Bounded Gill declarations, requests and plain-text rows for App hosts",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./presentation": {
+      "types": "./dist/presentation.d.ts",
+      "import": "./dist/presentation.js"
+    }
+  },
+  "files": [
+    "dist",
+    "docs/api",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "pnpm run clean && tsc -p tsconfig.build.json",
+    "clean": "node --input-type=module --eval \"import { rm } from 'node:fs/promises'; await rm('dist', { recursive: true, force: true });\"",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "lint": "eslint src test --max-warnings=0 && ../../node_modules/.bin/oxlint --config ../../oxlint.config.ts --deny-warnings src test",
+    "format:check": "node ../../tooling/repository/scripts/format-package-check.mjs",
+    "lint:anti-slop": "node ../../tooling/repository/scripts/lint-package-anti-slop.mjs",
+    "docs": "tsx ../../tooling/repository/src/docs/cli.ts check --root ../..",
+    "docs:write": "tsx ../../tooling/repository/src/docs/cli.ts write --root ../..",
+    "pack": "mkdir -p ../../.botanical/gills-pack && pnpm pack --pack-destination \"$PWD/../../.botanical/gills-pack\"",
+    "smoke": "node test/stranger/runtime.mjs",
+    "stranger": "tsx ../../tooling/repository/src/artifacts/cli.ts --repo-root ../.. .",
+    "prepack": "node scripts/prepare-package.mjs"
+  },
+  "dependencies": {
+    "effect": "4.0.2"
+  },
+  "devDependencies": {
+    "@types/node": "24.13.3",
+    "typescript": "5.9.3",
+    "vitest": "4.1.11"
+  },
+  "license": "MIT",
+  "botanical": {
+    "role": "package",
+    "operations": {
+      "lint": "required",
+      "typecheck": "required",
+      "build": "required",
+      "test": "required",
+      "docs": "required",
+      "pack": "required",
+      "smoke": "required",
+      "stranger": "required"
+    }
+  },
+  "publishConfig": {
+    "directory": ".botanical/package",
+    "linkDirectory": false
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/fungi-computer/gills.git"
+  }
+}

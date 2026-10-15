@@ -1,0 +1,20 @@
+{
+  "$schema": "https://typedoc.org/schema.json",
+  "extends": "../../tooling/docs/typedoc.base.json",
+  "name": "@fungi.computer/gills",
+  "entryPoints": ["src/index.ts", "src/presentation.ts"],
+  "tsconfig": "tsconfig.json",
+  "out": "docs/api",
+  "requiredToBeDocumented": [
+    "Enum",
+    "EnumMember",
+    "Variable",
+    "Function",
+    "Class",
+    "Interface",
+    "Method",
+    "Accessor",
+    "TypeAlias"
+  ],
+  "readme": "docs/overview.md"
+}
