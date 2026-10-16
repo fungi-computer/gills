@@ -57,3 +57,17 @@ export type RowV1 = Schema.Schema.Type<typeof rowSchemaV1>;
 export const rowPageSchemaV1 = Schema.Array(rowSchemaV1).pipe(
   Schema.check(Schema.isMaxLength(200)),
 );
+
+/** A finished App call as a person reads it: a shared row plus an optional thumbnail. */
+export const resultRowSchemaV1 = Schema.Struct({
+  ...rowSchemaV1.fields,
+  /** A Computer file the receiving host may preview; the host authorizes the read. */
+  media: Schema.optional(
+    Schema.Struct({
+      path: rowLabelSchemaV1,
+      format: Schema.Literals(["fungi:image", "fungi:video"]),
+    }),
+  ),
+});
+/** One shared result row; navigation and previews stay host-authorized. */
+export type ResultRow = Schema.Schema.Type<typeof resultRowSchemaV1>;
