@@ -1,6 +1,6 @@
 {
   "name": "@fungi.computer/gills",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "author": "Levi <levi@technomancy.dev>",
   "description": "Bounded Gill declarations, requests and plain-text rows for App hosts",
   "type": "module",
