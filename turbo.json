@@ -1,9 +1,6 @@
 {
   "extends": ["//"],
   "tasks": {
-    "lint": {
-      "dependsOn": ["build"]
-    },
     "typecheck": {
       "dependsOn": ["build"]
     }
