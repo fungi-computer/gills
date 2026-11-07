@@ -1,5 +1,13 @@
 # @fungi.computer/gills
 
+## 0.2.2
+
+### Patch Changes
+
+- Changes since 0.2.1:
+
+  - fix(apps): preserve disabled foreground outcomes
+
 ## 0.2.1
 
 ### Patch Changes

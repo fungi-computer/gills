@@ -53,7 +53,11 @@ export const gillResponseSchema = Schema.Union([
     rows: Schema.Tuple([]),
     /** Host-owned permanent execution refusal; an ordinary error may still be refreshed. */
     reason: Schema.optional(
-      Schema.Literals(["exec_isolation_required", "params_required"]),
+      Schema.Literals([
+        "exec_isolation_required",
+        "params_required",
+        "disabled",
+      ]),
     ),
     error: Schema.String.pipe(
       Schema.check(Schema.isMinLength(1)),

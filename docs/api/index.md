@@ -130,6 +130,16 @@ type RowV1 = Schema.Schema.Type<typeof rowSchemaV1>;
 
 One shared, bounded data row; the host owns navigation and execution.
 
+---
+
+### ResultRow
+
+```ts
+type ResultRow = Schema.Schema.Type<typeof resultRowSchemaV1>;
+```
+
+One shared result row; navigation and previews stay host-authorized.
+
 ## Variables
 
 ### appGillParamKeySchema
@@ -259,7 +269,7 @@ const gillResponseSchema: Union<readonly [Struct<{
   title: String;
   state: Literal<"error">;
   rows: Tuple<readonly []>;
-  reason: optional<Literals<readonly ["exec_isolation_required", "params_required"]>>;
+  reason: optional<Literals<readonly ["exec_isolation_required", "params_required", "disabled"]>>;
   error: String;
   recovery: optional<Union<readonly [Struct<{
      kind: Literal<"configure">;
@@ -311,7 +321,7 @@ const decodeGillResponse: (
       title: string;
       state: "error";
       rows: readonly [];
-      reason?: "exec_isolation_required" | "params_required";
+      reason?: "disabled" | "exec_isolation_required" | "params_required";
       error: string;
       recovery?:
         | {
@@ -364,7 +374,7 @@ Decode backend output once at the App host boundary.
   title: string;
   state: "error";
   rows: readonly [];
-  reason?: "exec_isolation_required" | "params_required";
+  reason?: "disabled" | "exec_isolation_required" | "params_required";
   error: string;
   recovery?:   | {
      kind: "configure";
@@ -382,7 +392,7 @@ Decode backend output once at the App host boundary.
 | `title`     | `string`                                                                      | `label`       | -                                                                                 |
 | `state`     | `"error"`                                                                     | -             | -                                                                                 |
 | `rows`      | readonly \[\]                                                                 | -             | -                                                                                 |
-| `reason?`   | `"exec_isolation_required"` \| `"params_required"`                            | -             | Host-owned permanent execution refusal; an ordinary error may still be refreshed. |
+| `reason?`   | `"disabled"` \| `"exec_isolation_required"` \| `"params_required"`            | -             | Host-owned permanent execution refusal; an ordinary error may still be refreshed. |
 | `error`     | `string`                                                                      | -             | -                                                                                 |
 | `recovery?` | \| \{ `kind`: `"configure"`; `param`: `string`; \} \| \{ `kind`: `"open"`; \} | -             | The host supplies the same-placement picker and this App's launch.                |
 
@@ -435,7 +445,7 @@ const gillReplySchema: Union<readonly [Union<readonly [Struct<{
   title: String;
   state: Literal<"error">;
   rows: Tuple<readonly []>;
-  reason: optional<Literals<readonly ["exec_isolation_required", "params_required"]>>;
+  reason: optional<Literals<readonly ["exec_isolation_required", "params_required", "disabled"]>>;
   error: String;
   recovery: optional<Union<readonly [Struct<{
      kind: ...;
@@ -489,7 +499,7 @@ const decodeGillReply: (
       title: string;
       state: "error";
       rows: readonly [];
-      reason?: "exec_isolation_required" | "params_required";
+      reason?: "disabled" | "exec_isolation_required" | "params_required";
       error: string;
       recovery?:
         | {
@@ -546,7 +556,7 @@ Decode the selected host's bounded reply before rendering or navigation.
   title: string;
   state: "error";
   rows: readonly [];
-  reason?: "exec_isolation_required" | "params_required";
+  reason?: "disabled" | "exec_isolation_required" | "params_required";
   error: string;
   recovery?:   | {
      kind: "configure";
@@ -564,7 +574,7 @@ Decode the selected host's bounded reply before rendering or navigation.
 | `title`     | `string`                                                                      | `label`       | -                                                                                 |
 | `state`     | `"error"`                                                                     | -             | -                                                                                 |
 | `rows`      | readonly \[\]                                                                 | -             | -                                                                                 |
-| `reason?`   | `"exec_isolation_required"` \| `"params_required"`                            | -             | Host-owned permanent execution refusal; an ordinary error may still be refreshed. |
+| `reason?`   | `"disabled"` \| `"exec_isolation_required"` \| `"params_required"`            | -             | Host-owned permanent execution refusal; an ordinary error may still be refreshed. |
 | `error`     | `string`                                                                      | -             | -                                                                                 |
 | `recovery?` | \| \{ `kind`: `"configure"`; `param`: `string`; \} \| \{ `kind`: `"open"`; \} | -             | The host supplies the same-placement picker and this App's launch.                |
 
@@ -746,6 +756,57 @@ const rowPageSchemaV1: $Array<
 
 A page containing at most 200 shared rows.
 
+---
+
+### resultRowSchemaV1
+
+```ts
+const resultRowSchemaV1: Struct<{
+  id: String;
+  title: String;
+  detail: optional<String>;
+  tone: optional<
+    Literals<readonly ["attention", "running", "error", "settled", "muted"]>
+  >;
+  status: optional<
+    Struct<{
+      label: String;
+      tone: Literals<
+        readonly [
+          "neutral",
+          "primary",
+          "secondary",
+          "accent",
+          "success",
+          "info",
+          "warning",
+          "error",
+        ]
+      >;
+    }>
+  >;
+  open: optional<
+    Struct<{
+      params: $Array<
+        Struct<{
+          key: String;
+          value: String;
+        }>
+      >;
+    }>
+  >;
+  media: optional<
+    Struct<{
+      path: String;
+      format: Literals<readonly ["fungi:image", "fungi:video"]>;
+    }>
+  >;
+}>;
+```
+
+A finished App call as a person reads it: a shared row plus an optional
+thumbnail.
+
 ## Functions
 
 ### decodeDeclaredGillResponse()
@@ -767,7 +828,7 @@ function decodeDeclaredGillResponse(
       title: string;
       state: "error";
       rows: readonly [];
-      reason?: "exec_isolation_required" | "params_required";
+      reason?: "disabled" | "exec_isolation_required" | "params_required";
       error: string;
       recovery?:
         | {
@@ -791,10 +852,10 @@ App output must match its digest-covered view identity.
 
 #### Parameters
 
-| Parameter     | Type                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
-| ------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `response`    | \| \{ `viewId`: `string`; `title`: `string`; `state`: `"empty"`; `rows`: readonly \[\]; `next?`: `string`; \} \| \{ `viewId`: `string`; `title`: `string`; `state`: `"error"`; `rows`: readonly \[\]; `reason?`: `"exec_isolation_required"` \| `"params_required"`; `error`: `string`; `recovery?`: \| \{ `kind`: `"configure"`; `param`: `string`; \} \| \{ `kind`: `"open"`; \}; \} \| \{ `viewId`: `string`; `title`: `string`; `state`: `"full"`; `rows`: readonly `object`[]; `next?`: `string`; \} |
-| `declaration` | `Pick`\<[`AppDeclaredGill`](#appdeclaredgill), `"id"` \| `"params"`\>                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| Parameter     | Type                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| ------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `response`    | \| \{ `viewId`: `string`; `title`: `string`; `state`: `"empty"`; `rows`: readonly \[\]; `next?`: `string`; \} \| \{ `viewId`: `string`; `title`: `string`; `state`: `"error"`; `rows`: readonly \[\]; `reason?`: `"disabled"` \| `"exec_isolation_required"` \| `"params_required"`; `error`: `string`; `recovery?`: \| \{ `kind`: `"configure"`; `param`: `string`; \} \| \{ `kind`: `"open"`; \}; \} \| \{ `viewId`: `string`; `title`: `string`; `state`: `"full"`; `rows`: readonly `object`[]; `next?`: `string`; \} |
+| `declaration` | `Pick`\<[`AppDeclaredGill`](#appdeclaredgill), `"id"` \| `"params"`\>                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 
 #### Returns
 
@@ -820,7 +881,7 @@ App output must match its digest-covered view identity.
   title: string;
   state: "error";
   rows: readonly [];
-  reason?: "exec_isolation_required" | "params_required";
+  reason?: "disabled" | "exec_isolation_required" | "params_required";
   error: string;
   recovery?:   | {
      kind: "configure";
@@ -838,7 +899,7 @@ App output must match its digest-covered view identity.
 | `title`     | `string`                                                                      | `label`       | -                                                                                 |
 | `state`     | `"error"`                                                                     | -             | -                                                                                 |
 | `rows`      | readonly \[\]                                                                 | -             | -                                                                                 |
-| `reason?`   | `"exec_isolation_required"` \| `"params_required"`                            | -             | Host-owned permanent execution refusal; an ordinary error may still be refreshed. |
+| `reason?`   | `"disabled"` \| `"exec_isolation_required"` \| `"params_required"`            | -             | Host-owned permanent execution refusal; an ordinary error may still be refreshed. |
 | `error`     | `string`                                                                      | -             | -                                                                                 |
 | `recovery?` | \| \{ `kind`: `"configure"`; `param`: `string`; \} \| \{ `kind`: `"open"`; \} | -             | The host supplies the same-placement picker and this App's launch.                |
 
@@ -874,6 +935,6 @@ Authenticated host Fetch stays outside App code and is pinned to one selection.
 
 #### Returns
 
-| Name        | Type                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            | Description                                                    |
-| ----------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------- |
-| `request()` | (`selectors`, `signal?`) => `Promise`\< \| \{ `viewId`: `string`; `title`: `string`; `state`: `"empty"`; `rows`: readonly \[\]; `next?`: `string`; \} \| \{ `viewId`: `string`; `title`: `string`; `state`: `"error"`; `rows`: readonly \[\]; `reason?`: `"exec_isolation_required"` \| `"params_required"`; `error`: `string`; `recovery?`: \| \{ `kind`: `"configure"`; `param`: `string`; \} \| \{ `kind`: `"open"`; \}; \} \| \{ `viewId`: `string`; `title`: `string`; `state`: `"full"`; `rows`: readonly `object`[]; `next?`: `string`; \} \| \{ `options`: readonly `object`[]; `next?`: `string`; \}\> | Fetch one decoded page using this client's pinned declaration. |
+| Name        | Type                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            | Description                                                    |
+| ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------- |
+| `request()` | (`selectors`, `signal?`) => `Promise`\< \| \{ `viewId`: `string`; `title`: `string`; `state`: `"empty"`; `rows`: readonly \[\]; `next?`: `string`; \} \| \{ `viewId`: `string`; `title`: `string`; `state`: `"error"`; `rows`: readonly \[\]; `reason?`: `"disabled"` \| `"exec_isolation_required"` \| `"params_required"`; `error`: `string`; `recovery?`: \| \{ `kind`: `"configure"`; `param`: `string`; \} \| \{ `kind`: `"open"`; \}; \} \| \{ `viewId`: `string`; `title`: `string`; `state`: `"full"`; `rows`: readonly `object`[]; `next?`: `string`; \} \| \{ `options`: readonly `object`[]; `next?`: `string`; \}\> | Fetch one decoded page using this client's pinned declaration. |
