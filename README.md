@@ -42,6 +42,11 @@ console.log(rows[0]?.title, request.viewId);
 - A **response** is an empty page, a full page of text rows, or an error. A
   request with `options: <parameter key>` returns a choice page instead.
   `decodeDeclaredGillResponse` rejects another view's identity.
+- An empty response may carry `emptyText` (one App-worded line, 1 to 120
+  characters, such as "Talk to an Agent: ask for a tiny game.") and
+  `action: { kind: "open" }`. The host shows the line with an "Open {App}"
+  button; `action` is what keeps the button when the App supplies its own text.
+  With neither, the widget says "Nothing here yet." with the button.
 - A **row** carries display text and optional navigation parameters. The host
   opens the Gill's own App; that App interprets the parameters. Rows cannot name
   a different App, a URL, or a Session-specific target. Navigation values retain

@@ -263,6 +263,10 @@ const gillResponseSchema: Union<readonly [Struct<{
   title: String;
   state: Literal<"empty">;
   rows: Tuple<readonly []>;
+  emptyText: optional<String>;
+  action: optional<Struct<{
+     kind: Literal<"open">;
+  }>>;
   next: optional<String>;
 }>, Struct<{
   viewId: String;
@@ -314,6 +318,10 @@ const decodeGillResponse: (
       title: string;
       state: "empty";
       rows: readonly [];
+      emptyText?: string;
+      action?: {
+        kind: "open";
+      };
       next?: string;
     }
   | {
@@ -360,9 +368,24 @@ Decode backend output once at the App host boundary.
   title: string;
   state: "empty";
   rows: readonly [];
+  emptyText?: string;
+  action?: {
+     kind: "open";
+  };
   next?: string;
 }
 ```
+
+| Name          | Type          | Default value | Description                                                 |
+| ------------- | ------------- | ------------- | ----------------------------------------------------------- |
+| `viewId`      | `string`      | `identity`    | -                                                           |
+| `title`       | `string`      | `label`       | -                                                           |
+| `state`       | `"empty"`     | -             | -                                                           |
+| `rows`        | readonly \[\] | -             | -                                                           |
+| `emptyText?`  | `string`      | -             | One line naming the first action, in the App's own words.   |
+| `action?`     | `object`      | -             | The host supplies the button; the App only says it belongs. |
+| `action.kind` | `"open"`      | -             | -                                                           |
+| `next?`       | `string`      | -             | -                                                           |
 
 ---
 
@@ -439,6 +462,10 @@ const gillReplySchema: Union<readonly [Union<readonly [Struct<{
   title: String;
   state: Literal<"empty">;
   rows: Tuple<readonly []>;
+  emptyText: optional<String>;
+  action: optional<Struct<{
+     kind: Literal<"open">;
+  }>>;
   next: optional<String>;
 }>, Struct<{
   viewId: String;
@@ -492,6 +519,10 @@ const decodeGillReply: (
       title: string;
       state: "empty";
       rows: readonly [];
+      emptyText?: string;
+      action?: {
+        kind: "open";
+      };
       next?: string;
     }
   | {
@@ -542,9 +573,24 @@ Decode the selected host's bounded reply before rendering or navigation.
   title: string;
   state: "empty";
   rows: readonly [];
+  emptyText?: string;
+  action?: {
+     kind: "open";
+  };
   next?: string;
 }
 ```
+
+| Name          | Type          | Default value | Description                                                 |
+| ------------- | ------------- | ------------- | ----------------------------------------------------------- |
+| `viewId`      | `string`      | `identity`    | -                                                           |
+| `title`       | `string`      | `label`       | -                                                           |
+| `state`       | `"empty"`     | -             | -                                                           |
+| `rows`        | readonly \[\] | -             | -                                                           |
+| `emptyText?`  | `string`      | -             | One line naming the first action, in the App's own words.   |
+| `action?`     | `object`      | -             | The host supplies the button; the App only says it belongs. |
+| `action.kind` | `"open"`      | -             | -                                                           |
+| `next?`       | `string`      | -             | -                                                           |
 
 ---
 
@@ -821,6 +867,10 @@ function decodeDeclaredGillResponse(
       title: string;
       state: "empty";
       rows: readonly [];
+      emptyText?: string;
+      action?: {
+        kind: "open";
+      };
       next?: string;
     }
   | {
@@ -852,10 +902,10 @@ App output must match its digest-covered view identity.
 
 #### Parameters
 
-| Parameter     | Type                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
-| ------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `response`    | \| \{ `viewId`: `string`; `title`: `string`; `state`: `"empty"`; `rows`: readonly \[\]; `next?`: `string`; \} \| \{ `viewId`: `string`; `title`: `string`; `state`: `"error"`; `rows`: readonly \[\]; `reason?`: `"disabled"` \| `"exec_isolation_required"` \| `"params_required"`; `error`: `string`; `recovery?`: \| \{ `kind`: `"configure"`; `param`: `string`; \} \| \{ `kind`: `"open"`; \}; \} \| \{ `viewId`: `string`; `title`: `string`; `state`: `"full"`; `rows`: readonly `object`[]; `next?`: `string`; \} |
-| `declaration` | `Pick`\<[`AppDeclaredGill`](#appdeclaredgill), `"id"` \| `"params"`\>                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| Parameter     | Type                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| ------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `response`    | \| \{ `viewId`: `string`; `title`: `string`; `state`: `"empty"`; `rows`: readonly \[\]; `emptyText?`: `string`; `action?`: \{ `kind`: `"open"`; \}; `next?`: `string`; \} \| \{ `viewId`: `string`; `title`: `string`; `state`: `"error"`; `rows`: readonly \[\]; `reason?`: `"disabled"` \| `"exec_isolation_required"` \| `"params_required"`; `error`: `string`; `recovery?`: \| \{ `kind`: `"configure"`; `param`: `string`; \} \| \{ `kind`: `"open"`; \}; \} \| \{ `viewId`: `string`; `title`: `string`; `state`: `"full"`; `rows`: readonly `object`[]; `next?`: `string`; \} |
+| `declaration` | `Pick`\<[`AppDeclaredGill`](#appdeclaredgill), `"id"` \| `"params"`\>                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
 
 #### Returns
 
@@ -867,9 +917,24 @@ App output must match its digest-covered view identity.
   title: string;
   state: "empty";
   rows: readonly [];
+  emptyText?: string;
+  action?: {
+     kind: "open";
+  };
   next?: string;
 }
 ```
+
+| Name          | Type          | Default value | Description                                                 |
+| ------------- | ------------- | ------------- | ----------------------------------------------------------- |
+| `viewId`      | `string`      | `identity`    | -                                                           |
+| `title`       | `string`      | `label`       | -                                                           |
+| `state`       | `"empty"`     | -             | -                                                           |
+| `rows`        | readonly \[\] | -             | -                                                           |
+| `emptyText?`  | `string`      | -             | One line naming the first action, in the App's own words.   |
+| `action?`     | `object`      | -             | The host supplies the button; the App only says it belongs. |
+| `action.kind` | `"open"`      | -             | -                                                           |
+| `next?`       | `string`      | -             | -                                                           |
 
 ---
 
@@ -935,6 +1000,6 @@ Authenticated host Fetch stays outside App code and is pinned to one selection.
 
 #### Returns
 
-| Name        | Type                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            | Description                                                    |
-| ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------- |
-| `request()` | (`selectors`, `signal?`) => `Promise`\< \| \{ `viewId`: `string`; `title`: `string`; `state`: `"empty"`; `rows`: readonly \[\]; `next?`: `string`; \} \| \{ `viewId`: `string`; `title`: `string`; `state`: `"error"`; `rows`: readonly \[\]; `reason?`: `"disabled"` \| `"exec_isolation_required"` \| `"params_required"`; `error`: `string`; `recovery?`: \| \{ `kind`: `"configure"`; `param`: `string`; \} \| \{ `kind`: `"open"`; \}; \} \| \{ `viewId`: `string`; `title`: `string`; `state`: `"full"`; `rows`: readonly `object`[]; `next?`: `string`; \} \| \{ `options`: readonly `object`[]; `next?`: `string`; \}\> | Fetch one decoded page using this client's pinned declaration. |
+| Name        | Type                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        | Description                                                    |
+| ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------- |
+| `request()` | (`selectors`, `signal?`) => `Promise`\< \| \{ `viewId`: `string`; `title`: `string`; `state`: `"empty"`; `rows`: readonly \[\]; `emptyText?`: `string`; `action?`: \{ `kind`: `"open"`; \}; `next?`: `string`; \} \| \{ `viewId`: `string`; `title`: `string`; `state`: `"error"`; `rows`: readonly \[\]; `reason?`: `"disabled"` \| `"exec_isolation_required"` \| `"params_required"`; `error`: `string`; `recovery?`: \| \{ `kind`: `"configure"`; `param`: `string`; \} \| \{ `kind`: `"open"`; \}; \} \| \{ `viewId`: `string`; `title`: `string`; `state`: `"full"`; `rows`: readonly `object`[]; `next?`: `string`; \} \| \{ `options`: readonly `object`[]; `next?`: `string`; \}\> | Fetch one decoded page using this client's pinned declaration. |

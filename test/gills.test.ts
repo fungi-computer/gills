@@ -190,6 +190,21 @@ describe("source-backed Gill wire", () => {
         rows: [],
       }).state,
     ).toBe("empty");
+    const empty = {
+      viewId: "commits",
+      title: "Commits",
+      state: "empty",
+      rows: [],
+    };
+    expect(
+      decodeGillResponse({
+        ...empty,
+        emptyText: "Ask an Agent for a tiny game.",
+        action: { kind: "open" },
+      }).state,
+    ).toBe("empty");
+    for (const emptyText of ["", "x".repeat(121)])
+      expect(() => decodeGillResponse({ ...empty, emptyText })).toThrow();
     expect(() =>
       decodeGillResponse({
         viewId: "commits",

@@ -1,5 +1,14 @@
 # @fungi.computer/gills
 
+## 0.3.0
+
+### Minor Changes
+
+- Changes since 0.2.2:
+
+  - fix(tourtois): quiet, App-worded empty widget
+  - feat(gills): empty widgets name the first action
+
 ## 0.2.2
 
 ### Patch Changes

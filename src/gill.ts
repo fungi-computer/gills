@@ -42,6 +42,15 @@ export const gillResponseSchema = Schema.Union([
     title: label,
     state: Schema.Literal("empty"),
     rows: Schema.Tuple([]),
+    /** One line naming the first action, in the App's own words. */
+    emptyText: Schema.optional(
+      Schema.String.pipe(
+        Schema.check(Schema.isMinLength(1)),
+        Schema.check(Schema.isMaxLength(120)),
+      ),
+    ),
+    /** The host supplies the button; the App only says it belongs. */
+    action: Schema.optional(Schema.Struct({ kind: Schema.Literal("open") })),
     next: Schema.optional(
       Schema.String.pipe(Schema.check(Schema.isMaxLength(1_024))),
     ),
