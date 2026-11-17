@@ -18,6 +18,7 @@ const size: AppGillDesktopSize = "M";
 const declaration: AppDeclaredGill = Schema.decodeUnknownSync(
   appDeclaredGillSchema,
 )({
+  view: "rows",
   id: "inbox",
   title: "Inbox",
   source: "listInbox",

@@ -1,9 +1,9 @@
 # Gills (`@fungi.computer/gills`)
 
-Gills defines compact, plain-text App views shared by browser and terminal
-hosts. It owns the row wire format, Gill declarations, bounded requests and
-responses, and an authenticated-fetch client. Your host owns admission,
-navigation and read-method admission.
+Gills defines compact App views: plain-text rows shared by browser and terminal
+hosts, or an App-owned surface for a desktop frame. It owns their declarations
+and the row request, response and authenticated-fetch contracts. Your host owns
+admission, navigation and frame mounting.
 
 ## Install or set up
 
@@ -33,10 +33,17 @@ console.log(rows[0]?.title, request.viewId);
 
 ## Core concepts
 
-- A **declaration** records the Gill's App-local identity, source read method,
-  optional placement parameters and their options read methods, change feed and
-  desktop sizes. Agar generates it from the backend; Puffball includes it in the
-  Release digest.
+- A **declaration** explicitly selects `view: "rows"` or `view: "surface"`. Rows
+  record the App-local identity, source read method, optional placement
+  parameters, change feed and desktop sizes. A surface records only its
+  identity, title and required desktop sizes: it has no read source, parameters
+  or watch. Agar generates both variants; Puffball includes them in the Release
+  digest. A new declaration without a view is refused. Only decoding an
+  already-stored Release, whose bytes cannot change, reads a missing view as
+  `rows` (`appStoredGillSchema`).
+- A **surface** uses the App's ordinary frame and authority. Its Gill identity
+  travels through the existing navigate params as `{ key: "gill", value: id }`,
+  not through a row request.
 - A **request** contains a view ID, placement parameters and optional source
   cursor. The host admits the method and Computer before invoking the App.
 - A **response** is an empty page, a full page of text rows, or an error. A
@@ -88,9 +95,10 @@ branch, and unique desktop sizes from S, M and L. An optional watch names an
 existing storage marker or binding change feed. Resource envelopes and row
 actions are not part of the contract.
 
-Decoders reject invalid wire values. Gill output is text data, never executable
-UI. Loading is host state. The client throws on HTTP errors unless the injected
-host decoder recognizes the refusal.
+Decoders reject invalid wire values. Row output is text data, never executable
+UI; surface declarations do not carry UI code either. Loading is host state. The
+row client throws on HTTP errors unless the injected host decoder recognizes the
+refusal.
 
 ## Contribute and license
 

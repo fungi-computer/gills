@@ -1,3 +1,4 @@
+import * as Effect from "effect/Effect";
 import * as Schema from "effect/Schema";
 
 /** Sizes the App explicitly offers for a desktop Gill. */
@@ -15,7 +16,8 @@ export type AppGillParam = Readonly<{
 /** An existing change feed used to refresh a Gill. */
 export type AppGillWatch = Readonly<{ storage: string } | { binding: string }>;
 /** A digest-covered projection of one declared read method. */
-export type AppDeclaredGill = Readonly<{
+export type AppDeclaredRowGill = Readonly<{
+  view: "rows";
   id: string;
   source: string;
   title: string;
@@ -23,6 +25,15 @@ export type AppDeclaredGill = Readonly<{
   watch?: AppGillWatch | undefined;
   desktop?: Readonly<{ sizes: readonly AppGillDesktopSize[] }> | undefined;
 }>;
+/** A digest-covered App frame placement, with no backend read method. */
+export type AppDeclaredSurfaceGill = Readonly<{
+  id: string;
+  title: string;
+  view: "surface";
+  desktop: Readonly<{ sizes: readonly AppGillDesktopSize[] }>;
+}>;
+/** An App-owned row projection or interactive surface. */
+export type AppDeclaredGill = AppDeclaredRowGill | AppDeclaredSurfaceGill;
 
 const isUnique = (values: readonly string[]): boolean =>
   new Set(values).size === values.length;
@@ -66,29 +77,68 @@ export const appGillWatchSchema = Schema.Union([
   Schema.Struct({ binding: meaningful }),
 ]);
 
-/** Digest-covered identity, source, context and desktop sizes of a Gill. */
-export const appDeclaredGillSchema: Schema.Codec<AppDeclaredGill> =
+const identity = meaningful.pipe(
+  Schema.check(
+    Schema.makeFilter((id) => !id.includes(":"), {
+      message: "Gill IDs are App-local",
+    }),
+  ),
+);
+const desktop = Schema.Struct({
+  sizes: Schema.Array(Schema.Literals(["S", "M", "L"])).check(
+    Schema.isMinLength(1),
+    Schema.isMaxLength(3),
+    Schema.makeFilter(isUnique, {
+      message: "Desktop Gill sizes must be unique",
+    }),
+  ),
+});
+const rowGill = <V extends Schema.Top>(view: V) =>
   Schema.Struct({
-    id: meaningful.pipe(
-      Schema.check(
-        Schema.makeFilter((id) => !id.includes(":"), {
-          message: "Gill IDs are App-local",
-        }),
-      ),
-    ),
+    id: identity,
+    view,
     title: meaningful,
     source: meaningful,
     params: Schema.optional(appGillParamsSchema),
     watch: Schema.optional(appGillWatchSchema),
-    desktop: Schema.optional(
-      Schema.Struct({
-        sizes: Schema.Array(Schema.Literals(["S", "M", "L"])).check(
-          Schema.isMinLength(1),
-          Schema.isMaxLength(3),
-          Schema.makeFilter(isUnique, {
-            message: "Desktop Gill sizes must be unique",
-          }),
-        ),
-      }),
-    ),
+    desktop: Schema.optional(desktop),
   });
+/** Digest-covered source, context and desktop sizes of a row Gill. */
+export const appDeclaredRowGillSchema: Schema.Codec<AppDeclaredRowGill> =
+  rowGill(Schema.Literal("rows"));
+/** A surface always declares its supported desktop sizes. */
+export const appDeclaredSurfaceGillSchema: Schema.Codec<AppDeclaredSurfaceGill> =
+  Schema.Struct({
+    id: identity,
+    title: meaningful,
+    view: Schema.Literal("surface"),
+    desktop,
+  });
+/** Every Gill explicitly selects its digest-covered view contract. */
+export const appDeclaredGillSchema: Schema.Codec<AppDeclaredGill> =
+  Schema.Union([appDeclaredRowGillSchema, appDeclaredSurfaceGillSchema]);
+
+/** A stored row Gill as encoded before surfaces existed: `view` may be absent. */
+export type AppStoredRowGillEncoded = Omit<AppDeclaredRowGill, "view"> &
+  Readonly<{ view?: "rows" }>;
+/** A stored Gill as encoded in a Release root or verified description. */
+export type AppStoredGillEncoded =
+  AppStoredRowGillEncoded | AppDeclaredSurfaceGill;
+/**
+ * Gills in an immutable stored Release, whose bytes cannot be rewritten without
+ * changing their digest. Roots published before surfaces existed omit `view`
+ * and were always rows, so storage decoding names that one default. New
+ * declarations never pass through here: they decode with
+ * {@link appDeclaredGillSchema}, which requires `view`.
+ */
+export const appStoredGillSchema: Schema.Codec<
+  AppDeclaredGill,
+  AppStoredGillEncoded
+> = Schema.Union([
+  rowGill(
+    Schema.Literal("rows").pipe(
+      Schema.withDecodingDefaultKey(Effect.succeed("rows" as const)),
+    ),
+  ),
+  appDeclaredSurfaceGillSchema,
+]);

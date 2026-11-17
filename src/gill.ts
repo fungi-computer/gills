@@ -1,5 +1,8 @@
 import * as Schema from "effect/Schema";
-import { appGillParamKeySchema, type AppDeclaredGill } from "./declaration.js";
+import {
+  appGillParamKeySchema,
+  type AppDeclaredRowGill,
+} from "./declaration.js";
 import {
   rowLabelSchemaV1 as label,
   rowIdentitySchemaV1 as identity,
@@ -136,7 +139,7 @@ export const decodeGillOptionsResponse = Schema.decodeUnknownSync(
 /** App output must match its digest-covered view identity. */
 export function decodeDeclaredGillResponse(
   response: GillResponse,
-  declaration: Pick<AppDeclaredGill, "id" | "params">,
+  declaration: Pick<AppDeclaredRowGill, "id" | "params">,
 ): GillResponse {
   if (response.viewId !== declaration.id)
     throw new Error("Gill response does not match its Release declaration");
@@ -159,7 +162,7 @@ export function createGillClient(
     ) => GillResponse | undefined;
     endpoint: string;
     fetch: typeof globalThis.fetch;
-    declaration: Pick<AppDeclaredGill, "id" | "title" | "params">;
+    declaration: Pick<AppDeclaredRowGill, "id" | "title" | "params">;
   }>,
 ) {
   return {

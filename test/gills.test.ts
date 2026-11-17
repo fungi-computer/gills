@@ -39,6 +39,7 @@ describe("source-backed Gill wire", () => {
       recovery: { kind: "configure", param: "computer" },
     });
     const declaration: AppDeclaredGill = {
+      view: "rows",
       id: "files",
       title: "Recent Files",
       source: "documents.recent",

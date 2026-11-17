@@ -1,5 +1,14 @@
 # @fungi.computer/gills
 
+## 0.4.0
+
+### Minor Changes
+
+- Changes since 0.3.0:
+
+  - fix(gills): decode stored Releases that predate Gill views as rows
+  - feat(gills): declare surface Gills beside row Gills
+
 ## 0.3.0
 
 ### Minor Changes

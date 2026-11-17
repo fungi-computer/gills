@@ -53,10 +53,11 @@ An existing change feed used to refresh a Gill.
 
 ---
 
-### AppDeclaredGill
+### AppDeclaredRowGill
 
 ```ts
-type AppDeclaredGill = Readonly<{
+type AppDeclaredRowGill = Readonly<{
+  view: "rows";
   id: string;
   source: string;
   title: string;
@@ -69,6 +70,56 @@ type AppDeclaredGill = Readonly<{
 ```
 
 A digest-covered projection of one declared read method.
+
+---
+
+### AppDeclaredSurfaceGill
+
+```ts
+type AppDeclaredSurfaceGill = Readonly<{
+  id: string;
+  title: string;
+  view: "surface";
+  desktop: Readonly<{
+    sizes: readonly AppGillDesktopSize[];
+  }>;
+}>;
+```
+
+A digest-covered App frame placement, with no backend read method.
+
+---
+
+### AppDeclaredGill
+
+```ts
+type AppDeclaredGill = AppDeclaredRowGill | AppDeclaredSurfaceGill;
+```
+
+An App-owned row projection or interactive surface.
+
+---
+
+### AppStoredRowGillEncoded
+
+```ts
+type AppStoredRowGillEncoded = Omit<AppDeclaredRowGill, "view"> &
+  Readonly<{
+    view?: "rows";
+  }>;
+```
+
+A stored row Gill as encoded before surfaces existed: `view` may be absent.
+
+---
+
+### AppStoredGillEncoded
+
+```ts
+type AppStoredGillEncoded = AppStoredRowGillEncoded | AppDeclaredSurfaceGill;
+```
+
+A stored Gill as encoded in a Release root or verified description.
 
 ---
 
@@ -205,13 +256,47 @@ A storage marker or host binding's existing change feed.
 
 ---
 
+### appDeclaredRowGillSchema
+
+```ts
+const appDeclaredRowGillSchema: Schema.Codec<AppDeclaredRowGill>;
+```
+
+Digest-covered source, context and desktop sizes of a row Gill.
+
+---
+
+### appDeclaredSurfaceGillSchema
+
+```ts
+const appDeclaredSurfaceGillSchema: Schema.Codec<AppDeclaredSurfaceGill>;
+```
+
+A surface always declares its supported desktop sizes.
+
+---
+
 ### appDeclaredGillSchema
 
 ```ts
 const appDeclaredGillSchema: Schema.Codec<AppDeclaredGill>;
 ```
 
-Digest-covered identity, source, context and desktop sizes of a Gill.
+Every Gill explicitly selects its digest-covered view contract.
+
+---
+
+### appStoredGillSchema
+
+```ts
+const appStoredGillSchema: Schema.Codec<AppDeclaredGill, AppStoredGillEncoded>;
+```
+
+Gills in an immutable stored Release, whose bytes cannot be rewritten without
+changing their digest. Roots published before surfaces existed omit `view` and
+were always rows, so storage decoding names that one default. New declarations
+never pass through here: they decode with
+[appDeclaredGillSchema](#appdeclaredgillschema), which requires `view`.
 
 ---
 
@@ -905,7 +990,7 @@ App output must match its digest-covered view identity.
 | Parameter     | Type                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
 | ------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `response`    | \| \{ `viewId`: `string`; `title`: `string`; `state`: `"empty"`; `rows`: readonly \[\]; `emptyText?`: `string`; `action?`: \{ `kind`: `"open"`; \}; `next?`: `string`; \} \| \{ `viewId`: `string`; `title`: `string`; `state`: `"error"`; `rows`: readonly \[\]; `reason?`: `"disabled"` \| `"exec_isolation_required"` \| `"params_required"`; `error`: `string`; `recovery?`: \| \{ `kind`: `"configure"`; `param`: `string`; \} \| \{ `kind`: `"open"`; \}; \} \| \{ `viewId`: `string`; `title`: `string`; `state`: `"full"`; `rows`: readonly `object`[]; `next?`: `string`; \} |
-| `declaration` | `Pick`\<[`AppDeclaredGill`](#appdeclaredgill), `"id"` \| `"params"`\>                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| `declaration` | `Pick`\<[`AppDeclaredRowGill`](#appdeclaredrowgill), `"id"` \| `"params"`\>                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
 
 #### Returns
 
@@ -994,9 +1079,9 @@ Authenticated host Fetch stays outside App code and is pinned to one selection.
 
 #### Parameters
 
-| Parameter | Type                                                                                                                                                                                                                                                                           |
-| --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `options` | `Readonly`\<\{ `decodeRefusal?`: (`raw`, `declaration`) => [`GillResponse`](#gillresponse) \| `undefined`; `endpoint`: `string`; `fetch`: _typeof_ `globalThis.fetch`; `declaration`: `Pick`\<[`AppDeclaredGill`](#appdeclaredgill), `"id"` \| `"title"` \| `"params"`\>; \}\> |
+| Parameter | Type                                                                                                                                                                                                                                                                                 |
+| --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `options` | `Readonly`\<\{ `decodeRefusal?`: (`raw`, `declaration`) => [`GillResponse`](#gillresponse) \| `undefined`; `endpoint`: `string`; `fetch`: _typeof_ `globalThis.fetch`; `declaration`: `Pick`\<[`AppDeclaredRowGill`](#appdeclaredrowgill), `"id"` \| `"title"` \| `"params"`\>; \}\> |
 
 #### Returns
 

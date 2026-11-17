@@ -9,6 +9,7 @@ import {
 } from "@fungi.computer/gills";
 
 const declaration = Schema.decodeUnknownSync(appDeclaredGillSchema)({
+  view: "rows",
   id: "inbox",
   title: "Inbox",
   source: "listInbox",
