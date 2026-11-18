@@ -1,20 +1,24 @@
 # Gills (`@fungi.computer/gills`)
 
-Gills defines compact App views: plain-text rows shared by browser and terminal
-hosts, or an App-owned surface for a desktop frame. It owns their declarations
-and the row request, response and authenticated-fetch contracts. Your host owns
-admission, navigation and frame mounting.
+Gills are small views of an App, such as an inbox, shared by the browser desktop
+and the terminal. They are lists of plain-text rows, or a full App frame on the
+desktop.
 
-## Install or set up
-
-```sh
-npm install @fungi.computer/gills effect@4.0.2
+```mermaid
+flowchart LR
+  App[App backend] -->|declares a Gill| Gills[Gills package]
+  Host[Browser or terminal host] -->|bounded request| Gills
+  Gills -->|row page| Host
+  Host -->|authenticated fetch| App
 ```
 
-Gills is ESM. Effect is its only runtime dependency. All exports are available
-from `@fungi.computer/gills` in Node, browsers and Workers.
-
 ## Quick start
+
+Install it:
+
+```sh
+npm install @fungi.computer/gills
+```
 
 Decode a row page and the selectors a caller may send:
 
@@ -30,6 +34,43 @@ const request = Schema.decodeUnknownSync(gillRequestSchema, {
 })({ viewId: "inbox" });
 console.log(rows[0]?.title, request.viewId);
 ```
+
+## Common tasks
+
+### Decode a page of rows
+
+`rowPageSchemaV1` checks the rows an App sends. See the Quick start.
+
+### Check a request
+
+`gillRequestSchema` rejects selectors a caller may not send. See the Quick
+start.
+
+### Show times the same way everywhere
+
+See Shared row time copy.
+
+### Know the limits
+
+See Limits and errors.
+
+## Reference
+
+### Overview
+
+Gills defines compact App views: plain-text rows shared by browser and terminal
+hosts, or an App-owned surface for a desktop frame. It owns their declarations
+and the row request, response and authenticated-fetch contracts. Your host owns
+admission, navigation and frame mounting.
+
+## Install or set up
+
+```sh
+npm install @fungi.computer/gills effect@4.0.2
+```
+
+Gills is ESM. Effect is its only runtime dependency. All exports are available
+from `@fungi.computer/gills` in Node, browsers and Workers.
 
 ## Core concepts
 
